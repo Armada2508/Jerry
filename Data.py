@@ -1,3 +1,4 @@
+import re
 from typing import Final
 
 
@@ -8,18 +9,18 @@ class JoystickData:
     axis1: Final[float]
     axis2: Final[float]
     axis3: Final[float]
-    button0: Final[float]
-    button1: Final[float]
-    button2: Final[float]
-    button3: Final[float]
-    button4: Final[float]
-    button5: Final[float]
-    button6: Final[float]
-    button7: Final[float]
-    button8: Final[float]
-    button9: Final[float]
-    button10: Final[float]
-    button11: Final[float]
+    button0: Final[int]
+    button1: Final[int]
+    button2: Final[int]
+    button3: Final[int]
+    button4: Final[int]
+    button5: Final[int]
+    button6: Final[int]
+    button7: Final[int]
+    button8: Final[int]
+    button9: Final[int]
+    button10: Final[int]
+    button11: Final[int]
     
     def __init__(self, ID, axis0, axis1, axis2, axis3, button0, button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11) -> None:
         self.ID = ID
@@ -62,7 +63,8 @@ class JoystickData:
         )
     
     def toRaw(self) -> bytes:
-        return "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}.".format(
+        return "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}".format(
+            self.ID,
             self.axis0,
             self.axis1,
             self.axis2,
@@ -80,4 +82,28 @@ class JoystickData:
             self.button10,
             self.button11
         ).encode("utf-8")
+    
+    @staticmethod
+    def fromRaw(rawBytes: bytes):
+        data = re.split(r",", rawBytes.decode())
+        print(data[5])
+        return JoystickData(
+            int(data[0]),
+            float(data[1]),
+            float(data[2]),
+            float(data[3]),
+            float(data[4]),
+            int(data[5]),
+            int(data[6]),
+            int(data[7]),
+            int(data[8]),
+            int(data[9]),
+            int(data[10]),
+            int(data[11]),
+            int(data[12]),
+            int(data[13]),
+            int(data[14]),
+            int(data[15]),
+            int(data[16]),
+        )
         
