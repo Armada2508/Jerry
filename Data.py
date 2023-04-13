@@ -112,11 +112,12 @@ class JoystickData:
     
     @staticmethod    
     def __roundAxis(axis: float):
+        chars = 7
         string = str(axis)
-        if len(string) < 7: 
+        if len(string) < chars: 
             return string[0:len(string)-1:1]
         else:
-            return string[0:7:1] 
+            return string[0:chars:1] 
         
     @staticmethod
     def fromRaw(rawBytes: bytes):

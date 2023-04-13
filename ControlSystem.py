@@ -14,8 +14,7 @@ pygame.init()
 joystick.init()
 
 sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# ip = "raspberrypi.local"
-ip = "localhost"
+ip = "raspberrypi.local"
 port = 13505
 address = (ip, port)
 
@@ -33,7 +32,7 @@ def main():
             while True:
                 pygame.event.pump()
                 currentPacket = JoystickData( controller.get_instance_id(),
-                    controller.get_axis(0), controller.get_axis(1), controller.get_axis(2), controller.get_axis(3),
+                    controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
                     controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
                     controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
                     controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
@@ -44,7 +43,9 @@ def main():
                 time.sleep(0.05)
         except BaseException as e:
             try: 
-                sock.send("Socket Closed".encode())
+                msg = "Socket Closed"
+                sock.send(str(len(msg)).encode())
+                sock.send(msg.encode())
             except Exception: 
                 pass
             print("Connection Closed. " + str(e))
