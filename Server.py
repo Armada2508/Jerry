@@ -1,6 +1,6 @@
 import os
 import socket
-import time
+import traceback
 
 from Data import JoystickData
 
@@ -13,21 +13,25 @@ sock.bind((ip, port))
 sock.listen(5)
 
 def main():
+    clear = "clear"
+    if os.name == "nt":
+        clear = "cls"
     while True:
         print("Waiting for Connection . . . ")
         client, address = sock.accept()
         print("Connection Created with " + str(address))
         try: 
             while True:
-                buf = client.recv(1024)
+                bufLength = int(client.recv(2).decode())
+                buf = client.recv(bufLength)
                 if (buf.decode() == "Socket Closed"):
                     break
                 data = JoystickData.fromRaw(buf)
-                os.system("clear")
+                os.system(clear)
                 print(data)
-                time.sleep(0.05)
-        except Exception as e:
-            print("Connection Interrupted. " + str(e))
+        except Exception:
+            print("Connection Interrupted.")
+            traceback.print_exc()
             client.close()
             pass
 

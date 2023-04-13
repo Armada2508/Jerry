@@ -1,3 +1,4 @@
+import math
 import re
 from typing import Final
 
@@ -61,14 +62,40 @@ class JoystickData:
             bool(self.button10),
             bool(self.button11)
         )
-    
+        
+    def __eq__(self, other):
+        tolerance = 0.0001
+        if self is other:
+            return True
+        if isinstance(other, JoystickData):
+            return (
+                self.ID == other.ID and
+                math.isclose(self.axis0, other.axis0, rel_tol=tolerance) and
+                math.isclose(self.axis1, other.axis1, rel_tol=tolerance) and
+                math.isclose(self.axis2, other.axis2, rel_tol=tolerance) and
+                math.isclose(self.axis3, other.axis3, rel_tol=tolerance) and
+                self.button0 == other.button0 and
+                self.button1 == other.button1 and
+                self.button2 == other.button2 and
+                self.button3 == other.button3 and
+                self.button4 == other.button4 and
+                self.button5 == other.button5 and
+                self.button6 == other.button6 and
+                self.button7 == other.button7 and
+                self.button8 == other.button8 and
+                self.button9 == other.button9 and
+                self.button10 == other.button10 and
+                self.button10 == other.button11
+            )
+        return False
+        
     def toRaw(self) -> bytes:
         return "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}".format(
             self.ID,
-            self.axis0,
-            self.axis1,
-            self.axis2,
-            self.axis3,
+            JoystickData.__roundAxis(self.axis0),
+            JoystickData.__roundAxis(self.axis1),
+            JoystickData.__roundAxis(self.axis2),
+            JoystickData.__roundAxis(self.axis3),
             self.button0,
             self.button1,
             self.button2,
@@ -83,10 +110,17 @@ class JoystickData:
             self.button11
         ).encode("utf-8")
     
+    @staticmethod    
+    def __roundAxis(axis: float):
+        string = str(axis)
+        if len(string) < 7: 
+            return string[0:len(string)-1:1]
+        else:
+            return string[0:7:1] 
+        
     @staticmethod
     def fromRaw(rawBytes: bytes):
         data = re.split(r",", rawBytes.decode())
-        print(data[5])
         return JoystickData(
             int(data[0]),
             float(data[1]),
