@@ -1,5 +1,5 @@
 # Jerry
-Control System for Jerry
+Control System for running and controlling Jerry the minibot.
 
 ## Running
 The server will automatically start up on Jerry and to gain control just run Client.py and have a joystick plugged in.
