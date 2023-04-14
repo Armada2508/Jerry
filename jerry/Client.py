@@ -8,20 +8,29 @@ import time
 import pygame
 from pygame import joystick
 
-from Data import JoystickData
+from Data import Constants, JoystickData
 
 pygame.init()
 joystick.init()
 
 sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ip = "raspberrypi.local"
-port = 13505
+ip = Constants.rpiIP
+port = Constants.port
 address = (ip, port)
 
+def bLen(obj):
+    return bytes(len(obj))
+
+def shutdown():
+    print("Closing Socket.")
+    sock.close()
+    joystick.quit()
+    pygame.quit()
+
 def main():
+    print("Waiting for a joystick to be connected . . .")
     while joystick.get_count() < 1:
         pygame.event.pump()
-        pass
     controller: joystick.JoystickType = joystick.Joystick(0)
     print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
     print("Connecting . . .")
@@ -38,25 +47,23 @@ def main():
                     controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
                 )
                 raw = currentPacket.toRaw()
-                sock.send(str(len(raw)).encode())
+                sock.send(bLen(raw))
                 sock.send(raw)
-                time.sleep(0.05)
-        except BaseException as e:
+                time.sleep(Constants.clientSleepSec)
+        finally:
             try: 
-                msg = "Socket Closed"
-                sock.send(str(len(msg)).encode())
+                msg = Constants.socketClose
+                sock.send(bLen(msg))
                 sock.send(msg.encode())
-            except Exception: 
+            except Exception as error: 
+                print("Couldn't send close message: " + str(error))
                 pass
-            print("Connection Closed. " + str(e))
-            pass
+            print("Connection Closed.")
+            shutdown()
     else:
         print("Socket Connection Failed. " + str(conn))
-        pass
-    print("Closing Socket.")
-    sock.close()
-    joystick.quit()
-    pygame.quit()
+    shutdown()
+    
     
 if __name__ == "__main__" :
     main()

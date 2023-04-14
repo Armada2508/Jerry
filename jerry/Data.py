@@ -3,6 +3,20 @@ import re
 from typing import Final
 
 
+class Constants:
+    # Sockets
+    rpiIP: Final[str] = "raspberrypi.local"
+    listenIP: Final[str] = "0.0.0.0"
+    port: Final[int] = 13505
+    socketClose: Final[str] = "Socket Closed"
+    enabledMsg: Final[str] = "ENABLED"
+    disabledMsg: Final[str] = "DISABLED"
+    clientTimeoutSec: Final[int] = 3
+    # Motors
+    talonFrequencyHz: Final[int] = 100
+    # Misc
+    clientSleepSec: Final[float] = 0.05
+
 class JoystickData:
     
     ID: Final[int]
@@ -112,12 +126,12 @@ class JoystickData:
     
     @staticmethod    
     def __roundAxis(axis: float):
-        chars = 7
+        precision = 2 + 7
         string = str(axis)
-        if len(string) < chars: 
+        if len(string) < precision: 
             return string[0:len(string)-1:1]
         else:
-            return string[0:chars:1] 
+            return string[0:precision:1] 
         
     @staticmethod
     def fromRaw(rawBytes: bytes):
