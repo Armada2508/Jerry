@@ -1,5 +1,6 @@
 import math
 import re
+from threading import Thread
 from typing import Final
 
 
@@ -17,6 +18,13 @@ class Constants:
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Misc
     clientSleepSec: Final[float] = 0.05
+    
+class StoppingThread(Thread):
+    stopped = False
+    def stop(self):
+        self.stopped = True
+    def giveSelfToTarget(self):
+        self._args = (self,) + self._args
 
 class JoystickData:
     

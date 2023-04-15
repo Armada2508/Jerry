@@ -2,7 +2,7 @@ import socket
 import traceback
 
 import pigpio
-from Data import Constants, JoystickData
+from Classes import Constants, JoystickData
 
 pi = pigpio.pi() 
 sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

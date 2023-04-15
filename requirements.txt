@@ -1,2 +1,3 @@
 pygame == 2.3.0
 pigpio == 1.78
+pynput == 1.7.6
