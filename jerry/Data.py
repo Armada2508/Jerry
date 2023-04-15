@@ -13,7 +13,7 @@ class Constants:
     disabledMsg: Final[str] = "DISABLED"
     clientTimeoutSec: Final[int] = 3
     # Motors
-    talonSignalPins: tuple[int] = (5)
+    talonSignalPins: tuple[int] = (5,)
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Misc
     clientSleepSec: Final[float] = 0.05
