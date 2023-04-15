@@ -2,12 +2,11 @@ import socket
 import traceback
 
 import pigpio
-
 from Data import Constants, JoystickData
 
 pi = pigpio.pi() 
 sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-motors = [5] # Signal pins
+motors = Constants.talonSignalPins
 robotEnabled = False
 
 ip = Constants.listenIP
@@ -31,7 +30,7 @@ def stop():
 def main():
     global robotEnabled
     while True:
-        print("Waiting for Connection . . . ")
+        print("Waiting for Connection . . .")
         client, clientAddress = sock.accept()
         print("Connection Created with " + str(clientAddress))
         try: 
@@ -52,14 +51,14 @@ def main():
         except TimeoutError as error:
             print("Connection Interrupted: " + str(error))
             traceback.print_exc()
-            pass
-        print("Client Closed.")
-        client.close()
-        stop() # stops every time socket loses connection or is closed
-        robotEnabled = False
+        finally:
+            stop() # stops every time socket loses connection or is closed
+            robotEnabled = False
+            print("Client Closed.")
+            client.close()
 
 if __name__ == "__main__" :
     for motor in motors:
-        pi.set_PWM_frequency(motor, Constants.talonFrequencyHz) # Talon SRX period is 10 ms
+        pi.set_PWM_frequency(motor, Constants.talonFrequencyHz)
     main()
     
