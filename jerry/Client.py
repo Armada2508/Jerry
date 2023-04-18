@@ -3,7 +3,6 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import socket
 import time
-from threading import Thread
 from tkinter import Button, Tk
 
 import pygame
@@ -62,7 +61,6 @@ def main(self: StoppingThread):
     while joystick.get_count() < 1:
         if self.stopped:
             return
-        print(robotEnabled)
         pygame.event.pump()
     controller: joystick.JoystickType = joystick.Joystick(0)
     print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
@@ -96,15 +94,26 @@ def main(self: StoppingThread):
                 lastVal = robotEnabled
         else:
             print("Socket Connection Failed. " + str(conn))
+            
+def setupGUI(root: Tk):
+    width = root.winfo_screenwidth()
+    height = 250
+    x = 0-8
+    y = root.winfo_screenheight()-height
+    root.title("Bootleg Driver Station")
+    root.geometry("{}x{}+{}+{}".format(width, height, x, y))
+    root.resizable(False, False)
+    root.attributes("-topmost", True)
+    root.bind("<Configure>", lambda event: root.geometry("+{}+{}".format(x, y)))
+    eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True))
+    dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False))
+    eButton.pack()
+    dButton.pack()
     
 if __name__ == "__main__":
     try:
         root = Tk()
-        root.title("Bootleg Driver Station")
-        eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True))
-        dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False))
-        eButton.pack()
-        dButton.pack()
+        setupGUI(root)
         controlLoop = StoppingThread(target = main, name = "Main Loop")
         controlLoop.giveSelfToTarget()
         controlLoop.start()

@@ -14,7 +14,7 @@ class Constants:
     disabledMsg: Final[str] = "DISABLED"
     clientTimeoutSec: Final[int] = 3
     # Motors
-    talonSignalPins: tuple[int] = (5,)
+    talonSignalPins: tuple[int] = (5, 5, 5, 5)
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Misc
     clientSleepSec: Final[float] = 0.05
@@ -29,10 +29,10 @@ class StoppingThread(Thread):
 class JoystickData:
     
     ID: Final[int]
-    axis0: Final[float]
-    axis1: Final[float]
-    axis2: Final[float]
-    axis3: Final[float]
+    xAxis: Final[float]
+    yAxis: Final[float]
+    twist: Final[float]
+    slider: Final[float]
     button0: Final[int]
     button1: Final[int]
     button2: Final[int]
@@ -48,10 +48,10 @@ class JoystickData:
     
     def __init__(self, ID, axis0, axis1, axis2, axis3, button0, button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11) -> None:
         self.ID = ID
-        self.axis0 = axis0
-        self.axis1 = axis1
-        self.axis2 = axis2
-        self.axis3 = axis3
+        self.xAxis = axis0
+        self.yAxis = axis1
+        self.twist = axis2
+        self.slider = axis3
         self.button0 = button0
         self.button1 = button1
         self.button2 = button2
@@ -68,10 +68,10 @@ class JoystickData:
     def __str__(self) -> str:
         return "Joystick: {} \nAxis: 0: {}, 1: {}, 2: {}, 3: {} \nButtons: 0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}, 8: {}, 9: {}, 10: {}, 11: {}".format(
             self.ID,
-            self.axis0,
-            self.axis1,
-            self.axis2,
-            self.axis3,
+            self.xAxis,
+            self.yAxis,
+            self.twist,
+            self.slider,
             bool(self.button0),
             bool(self.button1),
             bool(self.button2),
@@ -93,10 +93,10 @@ class JoystickData:
         if isinstance(other, JoystickData):
             return (
                 self.ID == other.ID and
-                math.isclose(self.axis0, other.axis0, rel_tol=tolerance) and
-                math.isclose(self.axis1, other.axis1, rel_tol=tolerance) and
-                math.isclose(self.axis2, other.axis2, rel_tol=tolerance) and
-                math.isclose(self.axis3, other.axis3, rel_tol=tolerance) and
+                math.isclose(self.xAxis, other.xAxis, rel_tol=tolerance) and
+                math.isclose(self.yAxis, other.yAxis, rel_tol=tolerance) and
+                math.isclose(self.twist, other.twist, rel_tol=tolerance) and
+                math.isclose(self.slider, other.slider, rel_tol=tolerance) and
                 self.button0 == other.button0 and
                 self.button1 == other.button1 and
                 self.button2 == other.button2 and
@@ -115,10 +115,10 @@ class JoystickData:
     def toRaw(self) -> bytes:
         return "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}".format(
             self.ID,
-            JoystickData.__roundAxis(self.axis0),
-            JoystickData.__roundAxis(self.axis1),
-            JoystickData.__roundAxis(self.axis2),
-            JoystickData.__roundAxis(self.axis3),
+            JoystickData.__roundAxis(self.xAxis),
+            JoystickData.__roundAxis(self.yAxis),
+            JoystickData.__roundAxis(self.twist),
+            JoystickData.__roundAxis(self.slider),
             self.button0,
             self.button1,
             self.button2,
