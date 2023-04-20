@@ -1,4 +1,3 @@
-#!/usr/bin/python3.11
 import socket
 import traceback
 
@@ -6,7 +5,8 @@ import pigpio
 from Classes import Constants, JoystickData
 
 pi = pigpio.pi() 
-sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 motorFR = Constants.talonSignalPins[0]
 motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
@@ -19,8 +19,8 @@ ip = Constants.listenIP
 port = Constants.port
 address = (ip, port)
 
-sock.bind(address)
-sock.listen(5)
+server.bind(address)
+server.listen(5)
 
 def getClampingFactor(input: list[float]) -> float:
     absNums = [abs(num) for num in input]
@@ -35,8 +35,14 @@ def drive(input: JoystickData):
     turn = input.twist
     motorSpeeds = [ySpeed, ySpeed, ySpeed, ySpeed]
     factor = getClampingFactor(motorSpeeds)
-    for i in range(4):
-        pi.set_servo_pulsewidth(motors[i], motorSpeeds[i] * factor)
+    factored = [factor * n for n in motorSpeeds]
+    print(factored)
+    for i in range(len(motors)):
+        pi.set_servo_pulsewidth(motors[i], toPulseWidth(motorSpeeds[i] * factor))
+        
+def toPulseWidth(val):
+    '''Converts from the range -1 to 1 into the range 1000 to 2000'''
+    return (val / 2 + 0.5) * 1000 + 1000
         
 def stop():
     for motor in motors:
@@ -44,33 +50,41 @@ def stop():
 
 def main():
     global robotEnabled
-    while True:
-        print("Waiting for Connection . . .")
-        client, clientAddress = sock.accept()
-        print("Connection Created with " + str(clientAddress))
-        try: 
-            client.settimeout(Constants.clientTimeoutSec)
-            while True:
-                bufLength = int(client.recv(2))
-                buf = client.recv(bufLength)
-                msg = buf.decode()
-                if msg.__eq__(Constants.socketClose):
-                    break
-                elif msg.__eq__(Constants.enabledMsg):
-                    robotEnabled = True
-                elif msg.__eq__(Constants.disabledMsg):
-                    robotEnabled = False
-                data = JoystickData.fromRaw(buf)
-                if robotEnabled:
-                    drive(data)
-        except TimeoutError as error:
-            print("Connection Interrupted: " + str(error))
-            traceback.print_exc()
-        finally:
-            stop() # stops every time socket loses connection or is closed
-            robotEnabled = False
-            print("Client Closed.")
-            client.close()
+    try:
+        while True:
+            print("Waiting for Connection . . .")
+            client, clientAddress = server.accept()
+            print("Connection Created with " + str(clientAddress))
+            try: 
+                client.settimeout(Constants.clientTimeoutSec)
+                while True:
+                    bufLength = int.from_bytes(client.recv(1), "big")
+                    if (bufLength <= 0): continue
+                    buf = client.recv(bufLength)
+                    msg = buf.decode()
+                    if msg.__eq__(Constants.socketClose):
+                        break
+                    elif msg.__eq__(Constants.enabledMsg):
+                        print("Enabled")
+                        robotEnabled = True
+                    elif msg.__eq__(Constants.disabledMsg):
+                        print("Disabled")
+                        robotEnabled = False
+                    else:
+                        data = JoystickData.fromRaw(buf)
+                        if robotEnabled:
+                            drive(data)
+            except socket.timeout as error:
+                print("Connection Interrupted: " + str(error))
+            finally:
+                stop() # stops every time socket loses connection or is closed
+                robotEnabled = False
+                print("Client Closed.")
+                client.close()
+    finally:
+        stop()
+        print("Server Closed.")
+        server.close()
 
 if __name__ == "__main__" :
     for motor in motors:

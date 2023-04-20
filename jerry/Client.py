@@ -1,7 +1,9 @@
 import os
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import copy
 import socket
+import sys
 import time
 from tkinter import Button, Tk
 
@@ -21,9 +23,9 @@ address = (ip, port)
 socketConnected = False
 robotEnabled = False
 
-def bLen(obj):
+def bLen(obj) -> bytes:
     '''Used to figure out how many bytes the data you want to send is.'''
-    return bytes(len(obj))
+    return int.to_bytes(len(obj))
 
 def updateEnabled(bool):
     '''You can't assign variables in lambdas.'''
@@ -72,7 +74,7 @@ def main(self: StoppingThread):
         if (conn == 0):
             socketConnected = True
             print("Successfully connected to " + str(address))
-            lastVal = robotEnabled
+            lastVal = False
             while True:
                 if self.stopped:
                     return
@@ -84,14 +86,14 @@ def main(self: StoppingThread):
                     controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
                 )
                 if (robotEnabled != lastVal):
+                    lastVal = robotEnabled
                     msg = Constants.enabledMsg if robotEnabled else Constants.disabledMsg
                     sock.send(bLen(msg))
-                    sock.send(msg)
+                    sock.send(msg.encode())
                 rawData = currentPacket.toRaw()
                 sock.send(bLen(rawData))
                 sock.send(rawData)
                 time.sleep(Constants.clientSleepSec)
-                lastVal = robotEnabled
         else:
             print("Socket Connection Failed. " + str(conn))
             
@@ -113,7 +115,8 @@ def setupGUI(root: Tk):
 if __name__ == "__main__":
     try:
         root = Tk()
-        setupGUI(root)
+        if (not sys.argv.__contains__("nogui")):
+            setupGUI(root)
         controlLoop = StoppingThread(target = main, name = "Main Loop")
         controlLoop.giveSelfToTarget()
         controlLoop.start()
