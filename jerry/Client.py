@@ -85,9 +85,10 @@ def main(self: StoppingThread):
                     controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
                     controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
                 )
-                if (robotEnabled != lastVal):
-                    lastVal = robotEnabled
-                    msg = Constants.enabledMsg if robotEnabled else Constants.disabledMsg
+                current = robotEnabled
+                if (current != lastVal):
+                    lastVal = current
+                    msg = Constants.enabledMsg if current else Constants.disabledMsg
                     sock.send(bLen(msg))
                     sock.send(msg.encode())
                 rawData = currentPacket.toRaw()
