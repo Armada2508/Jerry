@@ -5,7 +5,8 @@ import copy
 import socket
 import sys
 import time
-from tkinter import Button, Tk
+import tkinter
+from tkinter import Button, Label, Text, Tk
 
 import pygame
 from Classes import Constants, JoystickData, StoppingThread
@@ -20,6 +21,8 @@ ip = Constants.rpiIP
 port = Constants.port
 address = (ip, port)
 
+robotStatusLabel: Label
+
 socketConnected = False
 robotEnabled = False
 
@@ -31,6 +34,9 @@ def updateEnabled(bool):
     '''You can't assign variables in lambdas.'''
     global robotEnabled
     robotEnabled = bool
+    txt = Constants.enabledMsg if robotEnabled else Constants.disabledMsg
+    fg = "Green" if robotEnabled else "Red"
+    robotStatusLabel.config(text = "Robot Status: " + txt, foreground = fg)
     
 def stopProgram(root: Tk, thread, listen):
     thread.stop()
@@ -55,10 +61,10 @@ def cleanup():
 def listen(key):
     global robotEnabled
     if key == keyboard.Key.enter:
-        robotEnabled = False
+        updateEnabled(False)
     
 def main(self: StoppingThread):
-    global socketConnected
+    global socketConnected, sock
     print("Waiting for a joystick to be connected . . .")
     while joystick.get_count() < 1:
         if self.stopped:
@@ -67,37 +73,42 @@ def main(self: StoppingThread):
     controller: joystick.JoystickType = joystick.Joystick(0)
     print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
     while True:
-        if self.stopped:
-            return
-        print("Connecting . . .")
-        conn = sock.connect_ex(address)
-        if (conn == 0):
-            socketConnected = True
-            print("Successfully connected to " + str(address))
-            lastVal = False
-            while True:
-                if self.stopped:
-                    return
-                pygame.event.pump()
-                currentPacket = JoystickData( controller.get_instance_id(),
-                    controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
-                    controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
-                    controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
-                    controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
-                )
-                if (robotEnabled != lastVal):
-                    lastVal = robotEnabled
-                    msg = Constants.enabledMsg if robotEnabled else Constants.disabledMsg
-                    sock.send(bLen(msg))
-                    sock.send(msg.encode())
-                rawData = currentPacket.toRaw()
-                sock.send(bLen(rawData))
-                sock.send(rawData)
-                time.sleep(Constants.clientSleepSec)
-        else:
-            print("Socket Connection Failed. " + str(conn))
+        try:
+            if self.stopped:
+                return
+            print("Connecting . . .")
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            conn = sock.connect_ex(address)
+            if (conn == 0):
+                socketConnected = True
+                print("Successfully connected to " + str(address))
+                lastVal = False
+                while True:
+                    if self.stopped:
+                        return
+                    pygame.event.pump()
+                    currentPacket = JoystickData( controller.get_instance_id(),
+                        controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
+                        controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
+                        controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
+                        controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
+                    )
+                    if (robotEnabled != lastVal):
+                        lastVal = robotEnabled
+                        msg = Constants.enabledMsg if robotEnabled else Constants.disabledMsg
+                        sock.send(bLen(msg))
+                        sock.send(msg.encode())
+                    rawData = currentPacket.toRaw()
+                    sock.send(bLen(rawData))
+                    sock.send(rawData)
+                    time.sleep(Constants.clientSleepSec)
+            else:
+                print("Socket Connection Failed. " + str(conn))
+        except Exception as e:
+            print("Connection Disconnected: " + str(e))
             
 def setupGUI(root: Tk):
+    global robotStatusLabel
     width = root.winfo_screenwidth()
     height = 250
     x = 0-8
@@ -109,8 +120,10 @@ def setupGUI(root: Tk):
     root.bind("<Configure>", lambda event: root.geometry("+{}+{}".format(x, y)))
     eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True))
     dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False))
+    robotStatusLabel = Label(root, text = "Robot Status: " + Constants.disabledMsg, font = ("Ariel", 28), foreground = ("Red"))
     eButton.pack()
     dButton.pack()
+    robotStatusLabel.pack()
     
 if __name__ == "__main__":
     try:

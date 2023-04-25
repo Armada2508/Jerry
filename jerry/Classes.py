@@ -13,9 +13,12 @@ class Constants:
     enabledMsg: Final[str] = "ENABLED"
     disabledMsg: Final[str] = "DISABLED"
     clientTimeoutSec: Final[int] = 3
-    # Motors
-    talonSignalPins: tuple[int] = (5, 5, 5, 5)
+    # Motors, [FR, FL, BR, BL]
+    talonSignalPins: tuple[int] = (13, 6, 26, 19)
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
+    # Driving
+    speedFactor: Final[float] = 0.25
+    joystickDeadband: Final[float] = 0.06
     # Misc
     clientSleepSec: Final[float] = 0.05
     

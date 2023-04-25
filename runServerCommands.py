@@ -2,17 +2,24 @@ import sys
 
 import fabric
 from fabric.transfer import Transfer
+from invoke import UnexpectedExit
 
 from Hidden import password
 
+# host = "raspberrypi.local"
+host = "10.25.8.94"
 
 def main():
     args = sys.argv
-    c = fabric.Connection("raspberrypi.local", port=22, user="raspberry", connect_kwargs={'password': password})
-    
+    c = fabric.Connection(host, port=22, user="raspberry", connect_kwargs={'password': password})
+    c.open()
+    print("Connected!")
     if (args.__contains__('-k')):
         print("Killing python processes . . .")
-        c.run("pkill python")
+        try:
+            c.run("pkill python")
+        except UnexpectedExit as e:
+            print("No python processes running." + "\n" + str(e))
         print("Finished killing processes.")
 
     if (args.__contains__("-u")):
@@ -26,10 +33,11 @@ def main():
         print("Attempting to start pigpiod daemon.")
         c.run("sudo pigpiod")
 
-    with c.cd("~/Jerry/"):
-        print("Running Server . . .")
-        print("SERVER OUTPUT BELOW.\n")
-        c.run("python Server.py")
+    if (args.__contains__("-r")):
+        with c.cd("~/Jerry/"):
+            print("Running Server . . .")
+            print("SERVER OUTPUT BELOW.\n")
+            c.run("python Server.py")
     c.close()
     
 if __name__ == "__main__":
