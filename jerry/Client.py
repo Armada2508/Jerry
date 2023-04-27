@@ -6,7 +6,7 @@ import socket
 import sys
 import time
 import tkinter
-from tkinter import Button, Label, Text, Tk
+from tkinter import Button, Label, Tk
 
 import pygame
 from Classes import Constants, JoystickData, StoppingThread

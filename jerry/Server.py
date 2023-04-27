@@ -36,10 +36,6 @@ def drive(input: JoystickData):
     ySpeed = clampDeadband(ySpeed)
     xSpeed = clampDeadband(xSpeed)
     turn = clampDeadband(turn)
-    # # Clamping speeds to maximum
-    # ySpeed *= Constants.speedFactor
-    # xSpeed *= Constants.speedFactor
-    # turn *= Constants.speedFactor
     # Drive Mecanum
     motorSpeeds = [
         ySpeed - xSpeed - turn, #FR
@@ -49,12 +45,11 @@ def drive(input: JoystickData):
     ]
     # Getting factor to normalize everything so that the max is Constants.speedFactor and everything else is below that
     factor = getPowerFactor(motorSpeeds)
-    factored = [factor * n for n in motorSpeeds]
-    print(factored)
     for i in range(len(motors)):
         speed = motorSpeeds[i] * factor
         # Check for inverted motors
         if invertedMotors.__contains__(motors[i]): speed *= -1
+        speed * Constants.speedFactor
         pi.set_servo_pulsewidth(motors[i], toPulseWidth(speed))
         
 def clampDeadband(speed):
