@@ -43,6 +43,7 @@ def drive(input: JoystickData):
         ySpeed - xSpeed + turn, #BR
         ySpeed + xSpeed - turn  #BL
     ]
+    print(motorSpeeds)
     # Getting factor to normalize everything so that the max is Constants.speedFactor and everything else is below that
     factor = getPowerFactor(motorSpeeds)
     for i in range(len(motors)):
