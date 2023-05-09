@@ -6,7 +6,7 @@ import socket
 import sys
 import time
 import tkinter
-from tkinter import Button, Label, Tk
+from tkinter import Button, Frame, Label, Tk
 
 import pygame
 from Classes import Constants, JoystickData, StoppingThread
@@ -22,6 +22,8 @@ port = Constants.port
 address = (ip, port)
 
 robotStatusLabel: Label
+joystickStatusLabel: Label
+connectionStatusLabel: Label
 
 socketConnected = False
 robotEnabled = False
@@ -65,17 +67,19 @@ def listen(key):
     
 def main(self: StoppingThread):
     global socketConnected, sock
-    print("Waiting for a joystick to be connected . . .")
-    while joystick.get_count() < 1:
-        if self.stopped:
-            return
-        pygame.event.pump()
-    controller: joystick.JoystickType = joystick.Joystick(0)
-    print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
     while True:
-        try:
+        joystickStatusLabel.config(text = "Controller Disconnected", foreground = "Red")
+        connectionStatusLabel.config(text = "Not Connected to Robot", foreground = "Red")
+        print("Waiting for a joystick to be connected . . .")
+        pygame.event.pump()
+        while joystick.get_count() < 1:
             if self.stopped:
                 return
+            pygame.event.pump()
+        controller: joystick.JoystickType = joystick.Joystick(0)
+        print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
+        joystickStatusLabel.config(text = "Controller Connected", foreground = "Green")
+        try:
             print("Connecting . . .")
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn = sock.connect_ex(address)
@@ -83,10 +87,17 @@ def main(self: StoppingThread):
                 socketConnected = True
                 print("Successfully connected to " + str(address))
                 lastVal = False
+                connectionStatusLabel.config(text = "Connected to Robot", foreground = "Green")
                 while True:
                     if self.stopped:
                         return
                     pygame.event.pump()
+                    if (joystick.get_count() < 1):
+                        updateEnabled(False)
+                        msg = Constants.disabledMsg
+                        sock.send(bLen(msg))
+                        sock.send(msg.encode())
+                        break
                     currentPacket = JoystickData( controller.get_instance_id(),
                         controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
                         controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
@@ -106,10 +117,10 @@ def main(self: StoppingThread):
             else:
                 print("Socket Connection Failed. " + str(conn))
         except Exception as e:
-            print("Connection Disconnected: " + str(e))
+            print("Connection Stopped: " + str(e))
             
 def setupGUI(root: Tk):
-    global robotStatusLabel
+    global robotStatusLabel, joystickStatusLabel, connectionStatusLabel
     width = root.winfo_screenwidth()
     height = 250
     x = 0-8
@@ -118,13 +129,19 @@ def setupGUI(root: Tk):
     root.geometry("{}x{}+{}+{}".format(width, height, x, y))
     root.resizable(False, False)
     root.attributes("-topmost", True)
-    root.bind("<Configure>", lambda event: root.geometry("+{}+{}".format(x, y)))
-    eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True))
-    dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False))
+    root.bind("<Configure>", lambda event: root.geometry("+{}+{}".format(x, y))),
+    buttonLayout = Frame(root)
+    eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True), width = 20, height = 3, font = ("Ariel", 15))
+    dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False), width = 20, height = 3, font = ("Ariel", 15))
     robotStatusLabel = Label(root, text = "Robot Status: " + Constants.disabledMsg, font = ("Ariel", 28), foreground = ("Red"))
-    eButton.pack()
-    dButton.pack()
+    joystickStatusLabel = Label(root, text = "Controller Disconnected", font = ("Ariel", 20), foreground = ("Red"))
+    connectionStatusLabel = Label(root, text = "Not Connected to Robot", font = ("Ariel", 20), foreground = ("Red"))
+    buttonLayout.pack(side="top")
+    eButton.pack(in_=buttonLayout, side="left")
+    dButton.pack(in_=buttonLayout, side="right")
     robotStatusLabel.pack()
+    connectionStatusLabel.pack()
+    joystickStatusLabel.pack()
     
 if __name__ == "__main__":
     try:
