@@ -18,6 +18,7 @@ class Constants:
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Driving
     speedFactor: Final[float] = 0.5
+    turnFactor: Final[float] = 0.5
     joystickDeadband: Final[float] = 0.08
     # Misc
     clientSleepSec: Final[float] = 0.05

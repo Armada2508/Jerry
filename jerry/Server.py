@@ -1,6 +1,4 @@
-import math
 import socket
-import traceback
 
 import pigpio
 from Classes import Constants, JoystickData
@@ -35,7 +33,7 @@ def drive(input: JoystickData):
     # Deadband
     ySpeed = clampDeadband(ySpeed)
     xSpeed = clampDeadband(xSpeed)
-    turn = clampDeadband(turn)
+    turn = clampDeadband(turn) * Constants.turnFactor
     # Drive Mecanum
     motorSpeeds = [
         ySpeed - xSpeed - turn, #FR

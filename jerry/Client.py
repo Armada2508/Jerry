@@ -1,11 +1,9 @@
 import os
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-import copy
 import socket
 import sys
 import time
-import tkinter
 from tkinter import Button, Frame, Label, Tk
 
 import pygame
