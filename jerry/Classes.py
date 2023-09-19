@@ -18,8 +18,9 @@ class Constants:
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Driving
     speedFactor: Final[float] = 0.5
-    turnFactor: Final[float] = 0.5
+    turnFactor: Final[float] = 0.7
     joystickDeadband: Final[float] = 0.08
+    turnDeadband: Final[float] = 0.12
     # Misc
     clientSleepSec: Final[float] = 0.05
     # Robot Signal Light Relay Pins

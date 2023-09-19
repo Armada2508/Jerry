@@ -32,9 +32,9 @@ def drive(input: JoystickData):
     xSpeed = input.xAxis
     turn = input.twist
     # Deadband
-    ySpeed = clampDeadband(ySpeed)
-    xSpeed = clampDeadband(xSpeed)
-    turn = clampDeadband(turn) * Constants.turnFactor
+    ySpeed = clampDeadband(ySpeed, Constants.joystickDeadband)
+    xSpeed = clampDeadband(xSpeed, Constants.joystickDeadband)
+    turn = clampDeadband(turn, Constants.turnDeadband) * Constants.turnFactor
     # Drive Mecanum
     motorSpeeds = [
         ySpeed - xSpeed - turn, #FR
@@ -51,8 +51,8 @@ def drive(input: JoystickData):
         speed *= Constants.speedFactor
         pi.set_servo_pulsewidth(motors[i], toPulseWidth(speed))
         
-def clampDeadband(speed):
-    return 0 if (abs(speed) < Constants.joystickDeadband) else speed
+def clampDeadband(speed, deadband):
+    return 0 if (abs(speed) < deadband) else speed
         
 def toPulseWidth(val):
     '''Converts from the range -1 to 1 into the range 1000 to 2000'''
