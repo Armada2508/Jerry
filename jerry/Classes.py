@@ -14,7 +14,7 @@ class Constants:
     disabledMsg: Final[str] = "DISABLED"
     clientTimeoutSec: Final[int] = 3
     # Motors, [FR, FL, BR, BL]
-    talonSignalPins: tuple[int] = (13, 6, 26, 19)
+    talonSignalPins: tuple[int, ...] = (13, 6, 26, 19)
     talonFrequencyHz: Final[int] = 100 # Talon SRX period is 10 ms
     # Driving
     speedFactor: Final[float] = 0.5
@@ -22,6 +22,7 @@ class Constants:
     joystickDeadband: Final[float] = 0.08
     # Misc
     clientSleepSec: Final[float] = 0.05
+    RSLPin: Final[int] = 5 # Robot Signal Light Relay Pin
     
 class StoppingThread(Thread):
     stopped = False

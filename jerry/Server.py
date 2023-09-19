@@ -56,6 +56,14 @@ def clampDeadband(speed):
 def toPulseWidth(val):
     '''Converts from the range -1 to 1 into the range 1000 to 2000'''
     return (val / 2 + 0.5) * 1000 + 1000
+
+def flashRSL():
+    gpio = Constants.RSLPin
+    if (robotEnabled):
+        val = 0 if pi.read(gpio) == 1 else 1
+        pi.write(gpio, val)
+    else:
+        pi.write(gpio, 1)
         
 def stop():
     for motor in motors:
@@ -71,6 +79,7 @@ def main():
             try: 
                 client.settimeout(Constants.clientTimeoutSec)
                 while True:
+                    flashRSL()
                     bufLength = int.from_bytes(client.recv(1), "big")
                     if (bufLength <= 0): continue
                     buf = client.recv(bufLength)
