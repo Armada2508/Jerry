@@ -22,7 +22,9 @@ class Constants:
     joystickDeadband: Final[float] = 0.08
     # Misc
     clientSleepSec: Final[float] = 0.05
-    RSLPin: Final[int] = 5 # Robot Signal Light Relay Pin
+    # Robot Signal Light Relay Pins
+    RSLWPin: Final[int] = 3 
+    RSLRPin: Final[int] = 4 
     
 class StoppingThread(Thread):
     stopped = False

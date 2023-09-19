@@ -13,6 +13,7 @@ motorBL = Constants.talonSignalPins[3]
 motors = (motorFR, motorFL, motorBR, motorBL)
 invertedMotors = (motorFR, motorBL)
 robotEnabled = False
+flashTimer = 0
 
 ip = Constants.listenIP
 port = Constants.port
@@ -58,12 +59,15 @@ def toPulseWidth(val):
     return (val / 2 + 0.5) * 1000 + 1000
 
 def flashRSL():
-    gpio = Constants.RSLPin
+    global flashTimer
+    gpio = Constants.RSLRPin
     if (robotEnabled):
-        val = 0 if pi.read(gpio) == 1 else 1
-        pi.write(gpio, val)
+        if (flashTimer == 0):
+            val = 0 if pi.read(gpio) == 1 else 1
+            pi.write(gpio, val)
+        flashTimer = (flashTimer + 1) % 4
     else:
-        pi.write(gpio, 1)
+        pi.write(gpio, 0)
         
 def stop():
     for motor in motors:
@@ -71,6 +75,9 @@ def stop():
 
 def main():
     global robotEnabled
+    # Setup RSL Light
+    pi.write(Constants.RSLWPin, 1)
+    pi.write(Constants.RSLRPin, 0)
     try:
         while True:
             print("Waiting for Connection . . .")
