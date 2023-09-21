@@ -11,10 +11,10 @@ The server will automatically start up on Jerry and to gain control just run Cli
 All of the packages should be in requirements.txt. <br>
 `pip install -r requirements.txt` <br>
 ### runServerCommands.py
-Use this to perform various operations on the py. <br>
+Use this to perform various operations on the pi. <br>
 Flags: <br>
 `-u` - Uploads new files to the pi. Must be specfied in the file right now its Server.py and Classes.py<br>
-`-k` - Kills all python programs on the py. Should use this when uploading files.<br>
+`-k` - Kills all python programs on the pi. Should use this when uploading files.<br>
 `-p` - Runs the pigpio daemon on the pi to allow interacting with gpio.<br>
 `-r` - Runs the Server.py file to start the code.<br>
 eg. `py runServerCommands.py -k -u -r` will kill the python program, upload new files to the pi and run them.
