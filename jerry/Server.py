@@ -11,7 +11,7 @@ motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
 motorBL = Constants.talonSignalPins[3]
 motors = (motorFR, motorFL, motorBR, motorBL)
-invertedMotors = (motorFR, motorBL)
+invertedMotors = [motorBL]
 robotEnabled = False
 flashTimer = 0
 

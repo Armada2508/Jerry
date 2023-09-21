@@ -17,7 +17,7 @@ def main():
     if (args.__contains__('-k')):
         print("Killing python processes . . .")
         try:
-            c.run("pkill python")
+            c.run("sudo pkill python")
         except UnexpectedExit as e:
             print("No python processes running." + "\n" + str(e))
         print("Finished killing processes.")
