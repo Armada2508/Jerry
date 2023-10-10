@@ -31,7 +31,8 @@ def getAngularRate(data):
     rate = (rate << 2) | data[1] 
     rate = (rate << 8) | data[2]
     rate = rate >> 2
-    # twos compement
+
+    # two's complement
     rate /= 80.0 # convert from rate data to degrees per second
     return rate
     
