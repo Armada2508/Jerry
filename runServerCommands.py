@@ -27,6 +27,7 @@ def main():
         print("Uploading Files . . .")
         fileTransfer.put("jerry/Server.py", "Jerry/")
         fileTransfer.put("jerry/Classes.py", "Jerry/")
+        fileTransfer.put("jerry/Gyro.py", "Jerry/")
         print("Finished Upload.")
         
     if (args.__contains__("-p")):
