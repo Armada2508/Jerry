@@ -1,8 +1,6 @@
 import sys
 
 import fabric
-from fabric.transfer import Transfer
-from invoke import UnexpectedExit
 
 from Hidden import password
 
@@ -16,18 +14,14 @@ def main():
     print("Connected!")
     if (args.__contains__('-k')):
         print("Killing python processes . . .")
-        try:
-            c.run("sudo pkill python")
-        except UnexpectedExit as e:
-            print("No python processes running." + "\n" + str(e))
+        c.run("sudo pkill python", warn=True)
         print("Finished killing processes.")
 
     if (args.__contains__("-u")):
-        fileTransfer = Transfer(c)
         print("Uploading Files . . .")
-        fileTransfer.put("jerry/Server.py", "Jerry/")
-        fileTransfer.put("jerry/Classes.py", "Jerry/")
-        fileTransfer.put("jerry/Gyro.py", "Jerry/")
+        c.put("jerry/Server.py", "Jerry/")
+        c.put("jerry/Classes.py", "Jerry/")
+        c.put("jerry/Gyro.py", "Jerry/")
         print("Finished Upload.")
         
     if (args.__contains__("-p")):
@@ -37,8 +31,8 @@ def main():
     if (args.__contains__("-r")):
         with c.cd("~/Jerry/"):
             print("Running Server . . .")
-            print("SERVER OUTPUT BELOW.\n")
-            c.run("python Server.py")
+            print("Python Output Below.\n")
+            c.run("python Gyro.py", pty=True, warn=True) # Change back to Server.py when done.
     c.close()
     
 if __name__ == "__main__":
