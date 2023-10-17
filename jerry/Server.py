@@ -1,11 +1,15 @@
 import socket
+from threading import Thread
 
 import pigpio
 from Classes import Constants, JoystickData
+from Gyro import Gyro
 
 pi = pigpio.pi() 
 server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+gyro = Gyro(Constants.gyroDegreeDeadband)
+anglePollThread = Thread(target = gyro.updateAngle())
 motorFR = Constants.talonSignalPins[0]
 motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
@@ -87,6 +91,7 @@ def main():
                 client.settimeout(Constants.clientTimeoutSec)
                 while True:
                     flashRSL()
+                    print("Angle: " + str(gyro.getAngle()))
                     bufLength = int.from_bytes(client.recv(1), "big")
                     if (bufLength <= 0): continue
                     buf = client.recv(bufLength)
@@ -119,5 +124,6 @@ def main():
 if __name__ == "__main__" :
     for motor in motors:
         pi.set_PWM_frequency(motor, Constants.talonFrequencyHz)
+    anglePollThread.start()
     main()
     

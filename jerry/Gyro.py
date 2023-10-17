@@ -17,21 +17,25 @@ class Gyro:
     spi.lsbfirst = False
     spi.mode = 0b00
     
-    angle: float = 0
     degreeDriftDeadband: Final[float]
+    angle: float = 0
     success: bool = False
     lastTime: float = 0
     
     def __init__(self, deadband):
+        # automatically runs startup sequence on creation of gyro
         self.degreeDriftDeadband = deadband
         self.success = self.startupSequence()
         print("Startup sequence success? " + str(self.success))
+        
+    def getAngle(self) -> float:
+        return self.angle
     
-    def printResp(self, resp):
+    def printResp(self, resp) -> None:
         for byte in resp:
             print(format(byte, "#010b"))
             
-    def checkParity(self, byteArray):
+    def checkParity(self, byteArray) -> bool:
         # Returns true if odd parity is correct.
         bitCount = 0
         for byte in byteArray:
@@ -62,7 +66,7 @@ class Gyro:
             return None
         return resp
 
-    def getAngularVelocity(self, data):
+    def getAngularVelocity(self, data) -> float:
         # Returns angular velocity in degrees per second
         rate = data[0] & 0x03
         rate = (rate << 8) | data[1] 
@@ -72,7 +76,7 @@ class Gyro:
         rate /= 80.0 # convert from rate data to degrees per second
         return rate
         
-    def startupSequence(self):
+    def startupSequence(self) -> bool:
         # Returns whether it was a successful startup or not
         resp = self.spi.readbytes(4)
         if (int.from_bytes(resp, byteorder="big") == 1):
@@ -94,19 +98,16 @@ class Gyro:
             print("Gyro already started.")
             return True
         
-    def pollAngle(self):
-        if (self.success):
-            data = self.getSensorData()
-            if (data != None):
-                angularVelocity = self.getAngularVelocity(data)
-                currentTime = time.time()
-                if (self.lastTime == 0): # Skip first poll
-                    self.lastTime = currentTime
-                    return 0
-                dt = currentTime - self.lastTime
-                angleAdd = angularVelocity * dt
-                if (abs(angleAdd) > self.degreeDriftDeadband):
-                    self.angle += angleAdd
+    def updateAngle(self) -> None:
+        data = self.getSensorData()
+        if (data != None):
+            angularVelocity = self.getAngularVelocity(data)
+            currentTime = time.time()
+            if (self.lastTime == 0): # Skip first poll
                 self.lastTime = currentTime
-                print(str(self.angle) + " degrees.")
-        return None
+            dt = currentTime - self.lastTime
+            angleAdd = angularVelocity * dt
+            if (abs(angleAdd) > self.degreeDriftDeadband):
+                self.angle += angleAdd
+            self.lastTime = currentTime
+            # print(str(self.angle) + " degrees.")
