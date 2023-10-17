@@ -32,7 +32,7 @@ def main():
         with c.cd("~/Jerry/"):
             print("Running Server . . .")
             print("Python Output Below.\n")
-            c.run("python Gyro.py", pty=True, warn=True) # Change back to Server.py when done.
+            c.run("python Server.py", pty=True, warn=True)
     c.close()
     
 if __name__ == "__main__":

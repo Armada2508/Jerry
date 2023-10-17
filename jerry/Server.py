@@ -9,7 +9,7 @@ pi = pigpio.pi()
 server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 gyro = Gyro(Constants.gyroDegreeDeadband)
-anglePollThread = Thread(target = gyro.updateAngle())
+anglePollThread = Thread(target = gyro.updateAngleContinuously, name = "Gyro Updater")
 motorFR = Constants.talonSignalPins[0]
 motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
