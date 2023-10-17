@@ -91,7 +91,7 @@ def main():
                 client.settimeout(Constants.clientTimeoutSec)
                 while True:
                     flashRSL()
-                    print("Angle: " + str(gyro.getAngle()))
+                    print("Angle: " + str(gyro.getAngle() % 360))
                     bufLength = int.from_bytes(client.recv(1), "big")
                     if (bufLength <= 0): continue
                     buf = client.recv(bufLength)

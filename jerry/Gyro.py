@@ -110,7 +110,6 @@ class Gyro:
             if (abs(angleAdd) > self.degreeDriftDeadband):
                 self.angle += angleAdd
             self.lastTime = currentTime
-            # print(str(self.angle) + " degrees.")
             
     def updateAngleContinuously(self) -> None:
         while True:
