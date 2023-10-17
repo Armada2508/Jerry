@@ -38,9 +38,9 @@ def updateEnabled(bool):
     fg = "Green" if robotEnabled else "Red"
     robotStatusLabel.config(text = "Robot Status: " + txt, foreground = fg)
     
-def stopProgram(root: Tk, thread, listen):
-    thread.stop()
-    listen.stop()
+def stopProgram(root: Tk, controlThread: StoppingThread, keyboardListener: keyboard.Listener):
+    controlThread.stop()
+    keyboardListener.stop()
     root.destroy()
     
 def cleanup():
@@ -127,7 +127,7 @@ def setupGUI(root: Tk):
     root.geometry("{}x{}+{}+{}".format(width, height, x, y))
     root.resizable(False, False)
     root.attributes("-topmost", True)
-    root.bind("<Configure>", lambda event: root.geometry("+{}+{}".format(x, y))),
+    root.bind("<Configure>", root.geometry("+{}+{}".format(x, y)))
     buttonLayout = Frame(root)
     eButton = Button(root, text = "Enable", command = lambda: updateEnabled(True), width = 20, height = 3, font = ("Ariel", 15))
     dButton = Button(root, text = "Disable", command = lambda: updateEnabled(False), width = 20, height = 3, font = ("Ariel", 15))
@@ -142,15 +142,15 @@ def setupGUI(root: Tk):
     joystickStatusLabel.pack()
     
 if __name__ == "__main__":
-    try:
-        root = Tk()
-        if (not sys.argv.__contains__("nogui")):
+    root = Tk()
+    if (not sys.argv.__contains__("nogui")):
             setupGUI(root)
-        controlLoop = StoppingThread(target = main, name = "Main Loop")
-        controlLoop.giveSelfToTarget()
-        controlLoop.start()
-        enterListener = keyboard.Listener(on_press=listen)
-        enterListener.start()   
+    controlLoop = StoppingThread(target = main, name = "Main Loop")
+    controlLoop.giveSelfToTarget()
+    controlLoop.start()
+    enterListener = keyboard.Listener(on_press=listen)
+    enterListener.start()   
+    try:
         root.protocol("WM_DELETE_WINDOW", lambda: stopProgram(root, controlLoop, enterListener))
         root.mainloop()
     except KeyboardInterrupt:

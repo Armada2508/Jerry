@@ -8,5 +8,5 @@
         "**/Thumbs.db": true,
         "**/__pycache__": true
     },
-    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.typeCheckingMode": "basic",
 }
