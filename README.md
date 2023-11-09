@@ -5,7 +5,7 @@ Server.py contains all server and robot code. <br>
 Classes.py contains shared code and constants. <br>
 
 ## Running
-The server will automatically start up on Jerry and to gain control just run Client.py and have a joystick plugged in. Right now the client won't connect until a controller is plugged in.
+The server will automatically start up on Jerry and to gain control just run Client.py.
 
 ## Building/Deploying
 All of the packages should be in requirements.txt. <br>

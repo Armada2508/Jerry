@@ -27,6 +27,7 @@ class Constants:
     # Robot Signal Light Relay Pins
     RSLWPin: Final[int] = 3 
     RSLRPin: Final[int] = 4 
+    RSLFLashTime: Final[float] = 0.20
     
 class StoppingThread(Thread):
     stopped = False

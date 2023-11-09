@@ -62,21 +62,32 @@ def listen(key):
     global robotEnabled
     if key == keyboard.Key.enter:
         updateEnabled(False)
-    
+        
+def getJoystick():
+    pygame.event.pump()
+    if (joystick.get_count() > 0):
+        controller: joystick.JoystickType = joystick.Joystick(0)
+        joystickStatusLabel.config(text = "Controller Connected", foreground = "Green")
+        return controller
+    return None
+
+def checkControllerDisconnect():
+    lastCount = joystick.get_count()
+    pygame.event.pump()
+    if (joystick.get_count() < lastCount):
+        if robotEnabled:
+            updateEnabled(False)
+            msg = Constants.disabledMsg
+            sock.send(bLen(msg))
+            sock.send(msg.encode())
+    joystickStatusLabel.config(text = "Controller Disconnected", foreground = "Red")
+        
 def main(self: StoppingThread):
     global socketConnected, sock
     while True:
         joystickStatusLabel.config(text = "Controller Disconnected", foreground = "Red")
         connectionStatusLabel.config(text = "Not Connected to Robot", foreground = "Red")
-        print("Waiting for a joystick to be connected . . .")
-        pygame.event.pump()
-        while joystick.get_count() < 1:
-            if self.stopped:
-                return
-            pygame.event.pump()
-        controller: joystick.JoystickType = joystick.Joystick(0)
-        print("Controller: {}, ID: {}, Axis: {}, Buttons: {}".format(controller.get_name(), controller.get_instance_id(), controller.get_numaxes(), controller.get_numbuttons()))
-        joystickStatusLabel.config(text = "Controller Connected", foreground = "Green")
+        controller: joystick.JoystickType
         try:
             print("Connecting . . .")
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -89,28 +100,25 @@ def main(self: StoppingThread):
                 while True:
                     if self.stopped:
                         return
-                    pygame.event.pump()
-                    if (joystick.get_count() < 1):
-                        updateEnabled(False)
-                        msg = Constants.disabledMsg
-                        sock.send(bLen(msg))
-                        sock.send(msg.encode())
-                        break
-                    currentPacket = JoystickData( controller.get_instance_id(),
-                        controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
-                        controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
-                        controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
-                        controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
-                    )
                     current = robotEnabled
-                    if (current != lastVal):
+                    if (current != lastVal): # Send robot status data
                         lastVal = current
                         msg = Constants.enabledMsg if current else Constants.disabledMsg
                         sock.send(bLen(msg))
                         sock.send(msg.encode())
-                    rawData = currentPacket.toRaw()
-                    sock.send(bLen(rawData))
-                    sock.send(rawData)
+                    checkControllerDisconnect() 
+                    controller = getJoystick() # type: ignore
+                    if (controller != None): # Send controller data
+                        currentPacket = JoystickData(controller.get_instance_id(),
+                            controller.get_axis(0), controller.get_axis(1) * -1, controller.get_axis(2), controller.get_axis(3),
+                            controller.get_button(0), controller.get_button(1), controller.get_button(2), controller.get_button(3),
+                            controller.get_button(4), controller.get_button(5), controller.get_button(6), controller.get_button(7),
+                            controller.get_button(8), controller.get_button(9), controller.get_button(10), controller.get_button(11),
+                        )
+                        rawData = currentPacket.toRaw()
+                        sock.send(bLen(rawData))
+                        sock.send(rawData)
+                    sock.send(int.to_bytes(0)) # Keep alive packet
                     time.sleep(Constants.clientSleepSec)
             else:
                 print("Socket Connection Failed. " + str(conn))
