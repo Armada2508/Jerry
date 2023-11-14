@@ -16,7 +16,7 @@ motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
 motorBL = Constants.talonSignalPins[3]
 motors = (motorFR, motorFL, motorBR, motorBL)
-invertedMotors = [motorBL]
+invertedMotors = [motorFR, motorBL]
 robotEnabled = False
 
 ip = Constants.listenIP

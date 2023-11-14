@@ -20,7 +20,7 @@ class Constants:
     speedFactor: Final[float] = 0.5
     turnFactor: Final[float] = 0.7
     joystickDeadband: Final[float] = 0.08
-    turnDeadband: Final[float] = 0.12
+    turnDeadband: Final[float] = 0.15
     # Misc
     clientSleepSec: Final[float] = 0.05
     gyroDegreeDeadband: Final[float] = 0.02
