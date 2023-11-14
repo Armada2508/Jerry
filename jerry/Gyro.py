@@ -1,4 +1,5 @@
 import ctypes
+import math
 import time
 from typing import Final
 
@@ -29,7 +30,9 @@ class Gyro:
         print("Startup sequence success? " + str(self.success))
         
     def getAngle(self) -> float:
-        return self.angle
+        if self.success:
+            return self.angle
+        return 0
     
     def printResp(self, resp) -> None:
         for byte in resp:
@@ -65,6 +68,12 @@ class Gyro:
             self.printResp(resp)
             return None
         return resp
+    
+    def printFaultRegisters(self, resp):
+        byte = resp[3] >> 1
+        if (byte != 0):
+            print("Faults detected!")
+            print(format(byte, "#010b"))
 
     def getAngularVelocity(self, data) -> float:
         # Returns angular velocity in degrees per second
@@ -101,6 +110,7 @@ class Gyro:
     def updateAngle(self) -> None:
         data = self.getSensorData()
         if (data != None):
+            self.printFaultRegisters(data)
             angularVelocity = self.getAngularVelocity(data)
             currentTime = time.time()
             if (self.lastTime == 0): # Skip first poll
