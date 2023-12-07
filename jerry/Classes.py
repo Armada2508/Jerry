@@ -23,7 +23,7 @@ class Constants:
     turnDeadband: Final[float] = 0.15
     # Misc
     clientSleepSec: Final[float] = 0.05
-    gyroDegreeDeadband: Final[float] = 0
+    gyroDegreeDeadband: Final[float] = 0.02
     # Robot Signal Light Relay Pins
     RSLWPin: Final[int] = 3 
     RSLRPin: Final[int] = 4 
