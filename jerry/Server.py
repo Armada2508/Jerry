@@ -55,10 +55,10 @@ def drive(input: JoystickData):
         speed *= Constants.speedFactor
         pi.set_servo_pulsewidth(motors[i], toPulseWidth(speed))
         
-def clampDeadband(speed, deadband):
+def clampDeadband(speed: float, deadband: float):
     return 0 if (abs(speed) < deadband) else speed
         
-def toPulseWidth(val):
+def toPulseWidth(val: float):
     '''Converts from the range -1 to 1 into the range 1000 to 2000'''
     return (val / 2 + 0.5) * 1000 + 1000
 
