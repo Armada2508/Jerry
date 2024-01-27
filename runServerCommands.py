@@ -9,7 +9,7 @@ host = "10.25.8.94"
 
 def main():
     args = sys.argv
-    c = fabric.Connection(host, port=22, user="raspberry", connect_kwargs={'password': password})
+    c = fabric.Connection(host, port=22, user="raspberry", connect_kwargs={'password': password}, connect_timeout=10)
     c.open()
     print("Connected!")
     if (args.__contains__('-k')):

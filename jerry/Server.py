@@ -9,13 +9,13 @@ from Gyro import Gyro
 pi = pigpio.pi() 
 server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-gyro = Gyro(Constants.gyroDegreeDeadband)
-anglePollThread = Thread(target = gyro.updateAngleContinuously, name = "Gyro Updater")
+# gyro = Gyro(Constants.gyroDegreeDeadband)
+# anglePollThread = Thread(target = gyro.updateAngleContinuously, name = "Gyro Updater")
 motorFR = Constants.talonSignalPins[0]
 motorFL = Constants.talonSignalPins[1]
 motorBR = Constants.talonSignalPins[2]
 motorBL = Constants.talonSignalPins[3]
-motors = (motorFR, motorFL, motorBR, motorBL)
+motors = [motorFR, motorFL, motorBR, motorBL]
 invertedMotors = [motorFR, motorBL]
 robotEnabled = False
 
@@ -93,7 +93,7 @@ def main():
             try: 
                 client.settimeout(Constants.clientTimeoutSec)
                 while True:
-                    print("Angle: " + str(gyro.getAngle() % 360))
+                    # print("Angle: " + str(gyro.getAngle() % 360))
                     bufLength = int.from_bytes(client.recv(1), "big")
                     if (bufLength <= 0): continue
                     buf = client.recv(bufLength)
@@ -126,7 +126,7 @@ def main():
 if __name__ == "__main__" :
     for motor in motors:
         pi.set_PWM_frequency(motor, Constants.talonFrequencyHz)
-    anglePollThread.start()
+    # anglePollThread.start()
     flashRSLThread = Thread(target = RSLLoop, name = "RSL Flasher")
     flashRSLThread.start()
     main()
